@@ -1,0 +1,58 @@
+import rhinoscriptsyntax as rs
+import random as rnd
+
+Pt = {}
+
+#Define a midpoint function
+def MidPt(aP1, aP2):
+
+    MidPt = None
+    MidPt = [(aP1[0] + aP2[0]) / 2,
+    (aP1[1] + aP2[1]) / 2,
+    (aP1[2] + aP2[2]) / 2]
+    return MidPt
+
+#Define a point matrix function
+def PointMatrix():
+
+    #Get max values from user
+
+    imax = rs.GetInteger("Max number of pts in x", 10)
+    jmax = rs.GetInteger("Max number of pts in y", 10)
+    kmax = rs.GetInteger("Max number of pts in z", 10)
+
+    attPt = rs.GetObject("Select attractor point,", rs.filter.point)
+
+    #loop
+    for i in range(imax):
+        for j in range(jmax):
+            for k in range(kmax):
+
+                x = i
+                y = j
+                z = k
+
+                #define x,y,z in terms of i,j,k
+                distance = rs.Distance ((x,y,z), attPt)
+
+                x = i * 5 * (distance/20)
+                y = j * 5 * (distance/20)
+                z = k * 5 * (distance/5)
+
+                #a tuple, a temporary list
+                point = (x,y,z)
+                #develops an indexical key of two values
+                Pt[(i,j,k)] = [x,y,z]
+
+    for i in range(imax):
+        for j in range(jmax):
+            for k in range(kmax):
+
+                if i>0 and j>0 and k>0:
+                    #Create a pyramid by four triangle surfaces
+                    rs.AddSrfPt((MidPt(Pt[(i,j,k)], Pt[(i,j,k-1)]),Pt[(i,j-1,k-1)],Pt[(i,j,k-1)]))
+                    rs.AddSrfPt((MidPt(Pt[(i,j,k)], Pt[(i,j,k-1)]),Pt[(i-1,j,k-1)],Pt[(i,j,k-1)]))
+                    rs.AddSrfPt((MidPt(Pt[(i,j,k)], Pt[(i,j,k-1)]),Pt[(i-1,j,k-1)],Pt[(i,j-1,k-1)]))
+                    rs.AddSrfPt((Pt[(i-1,j,k-1)],Pt[(i,j-1,k-1)],Pt[(i,j,k-1)]))
+
+PointMatrix()
